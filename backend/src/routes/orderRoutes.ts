@@ -12,16 +12,17 @@ import { roleCheck } from '../middleware/roleCheck';
 
 const router = express.Router();
 
-// Customer routes
+// All routes require authentication
 router.use(auth);
 
-router.get('/', getOrders);
-router.get('/:id', getOrderById);
-router.post('/', createOrder);
-router.patch('/:id/cancel', cancelOrder);
-
-// Admin routes
+// Admin routes - must come BEFORE parameterized routes
 router.get('/all/list', roleCheck(['admin']), getAllOrders);
 router.patch('/:id/status', roleCheck(['admin']), updateOrderStatus);
+
+// Customer routes
+router.get('/', getOrders);
+router.post('/', createOrder);
+router.patch('/:id/cancel', cancelOrder);
+router.get('/:id', getOrderById);
 
 export default router;
