@@ -41,8 +41,8 @@ function CheckoutForm() {
     country: 'Sri Lanka',
   });
 
-  const tax = 0; // Calculate tax if needed
-  const shippingCost = 0; // Calculate shipping if needed
+  const tax: number = 0; // Calculate tax if needed
+  const shippingCost: number = 0; // Calculate shipping if needed
   const total = subtotal + tax + shippingCost;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

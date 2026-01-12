@@ -16,6 +16,9 @@ export interface User {
   role: 'customer' | 'admin';
   avatar?: string;
   addresses?: Address[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AuthResponse {

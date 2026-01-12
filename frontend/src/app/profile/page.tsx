@@ -98,8 +98,8 @@ export default function ProfilePage() {
               <div className="flex items-center space-x-4">
                 <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
                   <span className="text-3xl font-bold text-primary">
-                    {user.firstName[0]}
-                    {user.lastName[0]}
+                    {user.firstName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}
+                    {user.lastName?.[0]?.toUpperCase() || ''}
                   </span>
                 </div>
                 <div className="text-white">
