@@ -34,20 +34,54 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-light to-primary text-white py-20">
-        <div className="container-custom text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Fresh Groceries Delivered
-          </h1>
-          <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Shop quality products at affordable prices. Get everything delivered to your doorstep.
-          </p>
-          <Link
-            href="/products"
-            className="inline-block bg-white text-primary hover:bg-white/90 font-semibold py-4 px-8 rounded-lg transition duration-200 text-lg"
-          >
-            Shop Now
-          </Link>
+      <section className="bg-gray-50 py-16 md:py-24">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+                Fresh Groceries Delivered
+              </h1>
+              <p className="text-lg md:text-xl text-gray-600 mb-8">
+                Shop from thousands of fresh products and get them delivered to your doorstep.
+                Quality guaranteed, prices that won't break bank.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/products"
+                  className="inline-flex items-center bg-green-600 text-white hover:bg-green-700 font-semibold py-3 px-6 rounded-lg transition duration-200"
+                >
+                  Start Shopping
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </Link>
+                <Link
+                  href="/products"
+                  className="inline-flex items-center bg-white text-gray-900 hover:bg-gray-100 font-semibold py-3 px-6 rounded-lg border-2 border-gray-300 transition duration-200"
+                >
+                  View Offers
+                </Link>
+              </div>
+            </div>
+
+            {/* Right Image */}
+            <div className="relative">
+              <div className="rounded-2xl overflow-hidden shadow-2xl">
+                <img
+                  src="https://images.unsplash.com/photo-1543168256-418811576931?w=800&h=600&fit=crop"
+                  alt="Fresh Groceries Display"
+                  className="w-full h-auto object-cover"
+                  loading="eager"
+                />
+              </div>
+              {/* Optional overlay badge */}
+              <div className="absolute -bottom-6 -left-6 bg-green-600 text-white p-6 rounded-xl shadow-lg hidden lg:block">
+                <p className="text-3xl font-bold">100+</p>
+                <p className="text-sm">Fresh Products</p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

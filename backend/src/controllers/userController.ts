@@ -6,8 +6,9 @@ import User from '../models/User';
 // @access  Private/Admin
 export const getAllUsers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const requestedLimit = parseInt(req.query.limit as string) || 20;
+    const limit = Math.min(requestedLimit, 100); // Maximum 100 users per page
     const skip = (page - 1) * limit;
     const search = req.query.search as string || '';
 

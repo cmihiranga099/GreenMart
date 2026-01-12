@@ -229,3 +229,70 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
+
+// @desc    Update user profile
+// @route   PUT /api/auth/me
+// @access  Private
+export const updateMe = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({
+        success: false,
+        message: 'Not authorized',
+      });
+      return;
+    }
+
+    const { firstName, lastName, phone } = req.body;
+
+    // Validate input
+    if (!firstName || !lastName) {
+      res.status(400).json({
+        success: false,
+        message: 'First name and last name are required',
+      });
+      return;
+    }
+
+    // Update user
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.phone = phone || user.phone;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        user: {
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          phone: user.phone,
+          role: user.role,
+          avatar: user.avatar,
+          addresses: user.addresses,
+          createdAt: user.createdAt,
+          isActive: user.isActive,
+        },
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating profile',
+    });
+  }
+};
