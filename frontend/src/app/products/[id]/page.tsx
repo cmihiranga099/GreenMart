@@ -8,13 +8,15 @@ import { Product } from '../../../types/product';
 import Header from '../../../components/common/Header';
 import Footer from '../../../components/common/Footer';
 import { useCart } from '../../../context/CartContext';
+import { useWishlist } from '../../../context/WishlistContext';
 import { ShoppingCartIcon, HeartIcon } from '@heroicons/react/24/outline';
-import toast from 'react-hot-toast';
+import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addToCart, loading: cartLoading } = useCart();
+  const { isInWishlist, addToWishlist, removeFromWishlist, loading: wishlistLoading } = useWishlist();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -47,9 +49,14 @@ export default function ProductDetailPage() {
     await addToCart(product._id, quantity);
   };
 
-  const handleAddToWishlist = () => {
-    // Wishlist functionality will be implemented later
-    toast.success('Added to wishlist!');
+  const handleToggleWishlist = async () => {
+    if (!product) return;
+
+    if (isInWishlist(product._id)) {
+      await removeFromWishlist(product._id);
+    } else {
+      await addToWishlist(product._id);
+    }
   };
 
   if (loading) {
@@ -217,10 +224,19 @@ export default function ProductDetailPage() {
                   </button>
 
                   <button
-                    onClick={handleAddToWishlist}
-                    className="p-3 border-2 border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition"
+                    onClick={handleToggleWishlist}
+                    disabled={wishlistLoading}
+                    className={`p-3 border-2 rounded-lg transition ${
+                      isInWishlist(product._id)
+                        ? 'border-danger bg-danger/5'
+                        : 'border-gray-300 hover:border-primary hover:bg-primary/5'
+                    }`}
                   >
-                    <HeartIcon className="w-6 h-6 text-gray-700" />
+                    {isInWishlist(product._id) ? (
+                      <HeartIconSolid className="w-6 h-6 text-danger" />
+                    ) : (
+                      <HeartIcon className="w-6 h-6 text-gray-700" />
+                    )}
                   </button>
                 </div>
 

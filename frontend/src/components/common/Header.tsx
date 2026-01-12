@@ -1,13 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
-import { ShoppingCartIcon, UserIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, UserIcon, HeartIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">

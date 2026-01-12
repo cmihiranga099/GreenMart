@@ -1,9 +1,10 @@
+// Load environment variables first before any other imports
 import dotenv from 'dotenv';
+dotenv.config();
+
+// Now import other modules
 import app from './app';
 import connectDB from './config/database';
-
-// Load environment variables
-dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
