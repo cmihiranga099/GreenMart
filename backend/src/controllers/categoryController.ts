@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Category from '../models/Category';
+import Product from '../models/Product';
 import { uploadImage, deleteImage } from '../services/cloudinaryService';
 
 // @desc    Get all categories
@@ -9,10 +10,24 @@ export const getCategories = async (req: Request, res: Response): Promise<void> 
   try {
     const categories = await Category.find({ isActive: true }).sort({ name: 1 });
 
+    // Get product count for each category
+    const categoriesWithCount = await Promise.all(
+      categories.map(async (category) => {
+        const productCount = await Product.countDocuments({
+          category: category._id,
+          isActive: true
+        });
+        return {
+          ...category.toObject(),
+          productCount,
+        };
+      })
+    );
+
     res.status(200).json({
       success: true,
       count: categories.length,
-      data: categories,
+      data: categoriesWithCount,
     });
   } catch (error: any) {
     res.status(500).json({

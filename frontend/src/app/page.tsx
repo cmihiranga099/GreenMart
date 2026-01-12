@@ -5,16 +5,44 @@ import Link from 'next/link';
 import api from '../lib/api';
 import { Product } from '../types/product';
 import ProductCard from '../components/products/ProductCard';
+import CategoryCard from '../components/categories/CategoryCard';
 import Header from '../components/common/Header';
 import Footer from '../components/common/Footer';
 
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  image?: {
+    url: string;
+    publicId: string;
+  };
+  productCount?: number;
+}
+
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
     fetchFeaturedProducts();
+    fetchCategories();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get('/categories');
+      if (response.data.success) {
+        setCategories(response.data.data);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
   const fetchFeaturedProducts = async () => {
     try {
@@ -82,6 +110,48 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Shop by Category Section */}
+      <section className="py-16 bg-white">
+        <div className="container-custom">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                Shop by Category
+              </h2>
+              <p className="text-gray-600">
+                Find what you need quickly
+              </p>
+            </div>
+            <Link
+              href="/products"
+              className="text-primary hover:text-primary-dark font-semibold flex items-center gap-2"
+            >
+              View All
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </Link>
+          </div>
+
+          {categoriesLoading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+              <p className="mt-4 text-gray-600">Loading categories...</p>
+            </div>
+          ) : categories.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600 text-lg">No categories available</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {categories.map((category) => (
+                <CategoryCard key={category._id} category={category} />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
