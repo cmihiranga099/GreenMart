@@ -167,9 +167,12 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       status: 'pending',
     };
 
+    let clientSecret: string | null = null;
+
     if (paymentMethod === 'stripe') {
       const paymentIntent = await createPaymentIntent(total);
       paymentInfo.stripePaymentIntentId = paymentIntent.id;
+      clientSecret = paymentIntent.client_secret;
     }
 
     // Create order
@@ -197,7 +200,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       message: 'Order created successfully',
       data: {
         order: populatedOrder,
-        clientSecret: paymentInfo.stripePaymentIntentId ? (await createPaymentIntent(total)).client_secret : null,
+        clientSecret: clientSecret,
       },
     });
   } catch (error: any) {
@@ -320,8 +323,9 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
 // @access  Private/Admin
 export const getAllOrders = async (req: Request, res: Response): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const requestedLimit = parseInt(req.query.limit as string) || 20;
+    const limit = Math.min(requestedLimit, 100); // Maximum 100 orders per page
     const skip = (page - 1) * limit;
 
     const orders = await Order.find()

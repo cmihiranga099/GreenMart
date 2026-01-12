@@ -7,8 +7,9 @@ import { uploadImage, deleteImage } from '../services/cloudinaryService';
 // @access  Public
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
   try {
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 12;
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const requestedLimit = parseInt(req.query.limit as string) || 12;
+    const limit = Math.min(requestedLimit, 100); // Maximum 100 items per page
     const skip = (page - 1) * limit;
 
     // Build query

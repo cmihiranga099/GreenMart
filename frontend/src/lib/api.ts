@@ -35,7 +35,7 @@ api.interceptors.response.use(
           localStorage.removeItem('accessToken');
           if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
             // Only redirect if not already on login page
-            // window.location.href = '/login';
+            window.location.href = '/login';
           }
           break;
         case 403:
