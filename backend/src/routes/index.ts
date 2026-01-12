@@ -5,6 +5,7 @@ import categoryRoutes from './categoryRoutes';
 import cartRoutes from './cartRoutes';
 import wishlistRoutes from './wishlistRoutes';
 import orderRoutes from './orderRoutes';
+import userRoutes from './userRoutes';
 
 const router: Router = express.Router();
 
@@ -15,5 +16,6 @@ router.use('/categories', categoryRoutes);
 router.use('/cart', cartRoutes);
 router.use('/wishlist', wishlistRoutes);
 router.use('/orders', orderRoutes);
+router.use('/users', userRoutes);
 
 export default router;
