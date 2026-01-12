@@ -41,14 +41,19 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register({
+      const user = await register({
         email: formData.email,
         password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
         phone: formData.phone,
       });
-      router.push('/'); // Redirect to home after successful registration
+      // Redirect based on user role
+      if (user.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       // Error handling is done in AuthContext with toast
     } finally {

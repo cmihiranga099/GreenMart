@@ -8,8 +8,8 @@ import toast from 'react-hot-toast';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (data: RegisterData) => Promise<User>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<User> => {
     try {
       const response = await api.post<AuthResponse>('/auth/login', {
         email,
@@ -58,10 +58,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (response.data.success) {
-        setUser(response.data.data.user);
+        const userData = response.data.data.user;
+        setUser(userData);
         localStorage.setItem('accessToken', response.data.data.accessToken);
         toast.success('Login successful!');
+        return userData;
       }
+      throw new Error('Login failed');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Login failed';
       toast.error(message);
@@ -69,15 +72,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (data: RegisterData) => {
+  const register = async (data: RegisterData): Promise<User> => {
     try {
       const response = await api.post<AuthResponse>('/auth/register', data);
 
       if (response.data.success) {
-        setUser(response.data.data.user);
+        const userData = response.data.data.user;
+        setUser(userData);
         localStorage.setItem('accessToken', response.data.data.accessToken);
         toast.success('Registration successful!');
+        return userData;
       }
+      throw new Error('Registration failed');
     } catch (error: any) {
       const message = error.response?.data?.message || 'Registration failed';
       toast.error(message);

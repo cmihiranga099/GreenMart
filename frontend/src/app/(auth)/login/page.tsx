@@ -17,8 +17,13 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      router.push('/'); // Redirect to home after successful login
+      const user = await login(email, password);
+      // Redirect based on user role
+      if (user.role === 'admin') {
+        router.push('/admin');
+      } else {
+        router.push('/');
+      }
     } catch (error) {
       // Error handling is done in AuthContext with toast
     } finally {
