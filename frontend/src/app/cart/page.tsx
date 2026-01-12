@@ -93,6 +93,11 @@ export default function CartPage() {
                 </div>
 
                 {cart.items.map((item) => {
+                  // Skip items with missing products
+                  if (!item.product || !item.product.images || item.product.images.length === 0) {
+                    return null;
+                  }
+
                   const primaryImage = item.product.images.find((img) => img.isPrimary) || item.product.images[0];
 
                   return (

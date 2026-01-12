@@ -17,7 +17,7 @@ export const getCart = async (req: Request, res: Response): Promise<void> => {
 
     let cart = await Cart.findOne({ user: req.user._id }).populate({
       path: 'items.product',
-      select: 'name price images quantity status slug',
+      select: 'name price images quantity status slug unit',
     });
 
     // Create empty cart if doesn't exist
@@ -26,6 +26,13 @@ export const getCart = async (req: Request, res: Response): Promise<void> => {
         user: req.user._id,
         items: [],
       });
+    }
+
+    // Filter out items with deleted/unavailable products
+    const validItems = cart.items.filter((item: any) => item.product && item.product._id);
+    if (validItems.length !== cart.items.length) {
+      cart.items = validItems;
+      await cart.save();
     }
 
     // Calculate totals
@@ -144,7 +151,7 @@ export const addToCart = async (req: Request, res: Response): Promise<void> => {
     // Populate and return updated cart
     cart = await Cart.findById(cart._id).populate({
       path: 'items.product',
-      select: 'name price images quantity status slug',
+      select: 'name price images quantity status slug unit',
     });
 
     res.status(200).json({
@@ -232,7 +239,7 @@ export const updateCartItem = async (req: Request, res: Response): Promise<void>
     // Populate and return updated cart
     const updatedCart = await Cart.findById(cart._id).populate({
       path: 'items.product',
-      select: 'name price images quantity status slug',
+      select: 'name price images quantity status slug unit',
     });
 
     res.status(200).json({
@@ -283,7 +290,7 @@ export const removeFromCart = async (req: Request, res: Response): Promise<void>
     // Populate and return updated cart
     const updatedCart = await Cart.findById(cart._id).populate({
       path: 'items.product',
-      select: 'name price images quantity status slug',
+      select: 'name price images quantity status slug unit',
     });
 
     res.status(200).json({

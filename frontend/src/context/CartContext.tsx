@@ -43,8 +43,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await api.get('/cart');
       if (response.data.success) {
-        setCart(response.data.data.cart);
-        setItemCount(response.data.data.cart.items.length);
+        const cart = response.data.data.cart;
+        // Filter out items with null/undefined products
+        const validItems = cart.items.filter((item: any) => item.product && item.product._id);
+        cart.items = validItems;
+
+        setCart(cart);
+        setItemCount(validItems.length);
         setSubtotal(response.data.data.subtotal);
       }
     } catch (error: any) {

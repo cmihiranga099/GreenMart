@@ -94,10 +94,31 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     const { shippingAddress, paymentMethod } = req.body;
 
     // Validate shipping address
-    if (!shippingAddress || !shippingAddress.street || !shippingAddress.city) {
+    if (!shippingAddress) {
       res.status(400).json({
         success: false,
-        message: 'Please provide complete shipping address',
+        message: 'Please provide shipping address',
+      });
+      return;
+    }
+
+    // Validate all required shipping address fields
+    const requiredFields = ['firstName', 'lastName', 'phone', 'street', 'city', 'zipCode', 'country'];
+    const missingFields = requiredFields.filter(field => !shippingAddress[field]);
+
+    if (missingFields.length > 0) {
+      res.status(400).json({
+        success: false,
+        message: `Missing required fields: ${missingFields.join(', ')}`,
+      });
+      return;
+    }
+
+    // Validate payment method
+    if (!paymentMethod || !['stripe', 'cash_on_delivery'].includes(paymentMethod)) {
+      res.status(400).json({
+        success: false,
+        message: 'Please provide a valid payment method',
       });
       return;
     }
@@ -111,6 +132,23 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         message: 'Cart is empty',
       });
       return;
+    }
+
+    // Filter out items with null products
+    const validItems = cart.items.filter((item: any) => item.product && item.product._id);
+
+    if (validItems.length === 0) {
+      res.status(400).json({
+        success: false,
+        message: 'No valid items in cart. Some products may have been removed.',
+      });
+      return;
+    }
+
+    if (validItems.length !== cart.items.length) {
+      // Update cart to remove invalid items
+      cart.items = validItems;
+      await cart.save();
     }
 
     // Prepare order items and calculate total
