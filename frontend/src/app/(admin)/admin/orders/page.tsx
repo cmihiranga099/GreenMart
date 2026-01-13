@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { format } from 'date-fns';
-import { EyeIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, TruckIcon } from '@heroicons/react/24/outline';
 
 interface Order {
   _id: string;
@@ -32,6 +32,17 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+
+  // Tracking modal state
+  const [showTrackingModal, setShowTrackingModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [trackingData, setTrackingData] = useState({
+    status: '',
+    location: '',
+    description: '',
+    estimatedDelivery: '',
+  });
+  const [submittingTracking, setSubmittingTracking] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -66,6 +77,53 @@ export default function AdminOrdersPage() {
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to update order status';
       toast.error(message);
+    }
+  };
+
+  const handleOpenTrackingModal = (orderId: string) => {
+    setSelectedOrderId(orderId);
+    setShowTrackingModal(true);
+    setTrackingData({
+      status: '',
+      location: '',
+      description: '',
+      estimatedDelivery: '',
+    });
+  };
+
+  const handleCloseTrackingModal = () => {
+    setShowTrackingModal(false);
+    setSelectedOrderId(null);
+    setTrackingData({
+      status: '',
+      location: '',
+      description: '',
+      estimatedDelivery: '',
+    });
+  };
+
+  const handleSubmitTracking = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!trackingData.status || !trackingData.location || !trackingData.description) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setSubmittingTracking(true);
+      const response = await api.post(`/orders/${selectedOrderId}/tracking`, trackingData);
+
+      if (response.data.success) {
+        toast.success('Tracking update added successfully');
+        handleCloseTrackingModal();
+        fetchOrders();
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to add tracking update';
+      toast.error(message);
+    } finally {
+      setSubmittingTracking(false);
     }
   };
 

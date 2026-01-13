@@ -9,6 +9,13 @@ import Image from 'next/image';
 import { format } from 'date-fns';
 import Link from 'next/link';
 
+interface TrackingUpdate {
+  status: string;
+  location: string;
+  description: string;
+  timestamp: string;
+}
+
 interface OrderDetail {
   _id: string;
   orderNumber: string;
@@ -32,6 +39,8 @@ interface OrderDetail {
     status: string;
     paidAt?: string;
   };
+  trackingUpdates?: TrackingUpdate[];
+  estimatedDelivery?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -217,6 +226,50 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             </div>
+
+            {/* Delivery Tracking */}
+            {order.trackingUpdates && order.trackingUpdates.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold mb-4">Delivery Tracking</h2>
+                {order.estimatedDelivery && (
+                  <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <span className="font-medium">Estimated Delivery:</span>{' '}
+                      {format(new Date(order.estimatedDelivery), 'MMMM dd, yyyy')}
+                    </p>
+                  </div>
+                )}
+                <div className="relative">
+                  {order.trackingUpdates
+                    .slice()
+                    .reverse()
+                    .map((update, index) => (
+                      <div key={index} className="flex mb-6 last:mb-0">
+                        <div className="flex flex-col items-center mr-4">
+                          <div className="w-3 h-3 bg-primary rounded-full"></div>
+                          {index !== order.trackingUpdates!.length - 1 && (
+                            <div className="w-0.5 h-full bg-gray-300 my-1"></div>
+                          )}
+                        </div>
+                        <div className="flex-1 pb-6">
+                          <div className="bg-gray-50 rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h3 className="font-semibold text-gray-900">{update.status}</h3>
+                              <span className="text-xs text-gray-500">
+                                {format(new Date(update.timestamp), 'MMM dd, yyyy - hh:mm a')}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-1">{update.description}</p>
+                            <p className="text-xs text-gray-500">
+                              <span className="font-medium">Location:</span> {update.location}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
             {/* Shipping Address */}
             <div className="bg-white rounded-lg shadow-sm p-6">
