@@ -83,7 +83,11 @@ export const getOrderById = async (req: Request, res: Response): Promise<void> =
 // @access  Private
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
   try {
+    console.log('=== CREATE ORDER REQUEST ===');
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
+
     if (!req.user) {
+      console.log('ERROR: No user authenticated');
       res.status(401).json({
         success: false,
         message: 'Not authorized',
@@ -92,9 +96,12 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     }
 
     const { shippingAddress, paymentMethod } = req.body;
+    console.log('Shipping address:', shippingAddress);
+    console.log('Payment method:', paymentMethod);
 
     // Validate shipping address
     if (!shippingAddress) {
+      console.log('ERROR: No shipping address provided');
       res.status(400).json({
         success: false,
         message: 'Please provide shipping address',
@@ -107,6 +114,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     const missingFields = requiredFields.filter(field => !shippingAddress[field]);
 
     if (missingFields.length > 0) {
+      console.log('ERROR: Missing shipping address fields:', missingFields);
       res.status(400).json({
         success: false,
         message: `Missing required fields: ${missingFields.join(', ')}`,
@@ -116,6 +124,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
     // Validate payment method
     if (!paymentMethod || !['stripe', 'cash_on_delivery'].includes(paymentMethod)) {
+      console.log('ERROR: Invalid payment method:', paymentMethod);
       res.status(400).json({
         success: false,
         message: 'Please provide a valid payment method',
@@ -123,10 +132,14 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
+    console.log('✓ Validation passed, fetching cart...');
+
     // Get user's cart
     const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
+    console.log('Cart found:', cart ? `${cart.items.length} items` : 'null');
 
     if (!cart || cart.items.length === 0) {
+      console.log('ERROR: Cart is empty');
       res.status(400).json({
         success: false,
         message: 'Cart is empty',
@@ -136,8 +149,10 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
 
     // Filter out items with null products
     const validItems = cart.items.filter((item: any) => item.product && item.product._id);
+    console.log('Valid items in cart:', validItems.length);
 
     if (validItems.length === 0) {
+      console.log('ERROR: No valid items in cart');
       res.status(400).json({
         success: false,
         message: 'No valid items in cart. Some products may have been removed.',
@@ -146,16 +161,19 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     }
 
     if (validItems.length !== cart.items.length) {
+      console.log('Cleaning cart: removing invalid items');
       // Update cart to remove invalid items
       cart.items = validItems;
       await cart.save();
     }
 
+    console.log('✓ Cart validated, processing order items...');
+
     // Prepare order items and calculate total
     const orderItems = [];
     let subtotal = 0;
 
-    for (const item of cart.items) {
+    for (const item of validItems) {
       const product: any = item.product;
 
       // Check product availability
@@ -171,7 +189,17 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       if (product.quantity < item.quantity) {
         res.status(400).json({
           success: false,
-          message: `Insufficient stock for ${product.name}`,
+          message: `Insufficient stock for ${product.name}. Only ${product.quantity} available.`,
+        });
+        return;
+      }
+
+      // Get product image
+      if (!product.images || product.images.length === 0) {
+        console.log('ERROR: Product has no images:', product.name);
+        res.status(400).json({
+          success: false,
+          message: `Product ${product.name} has no images`,
         });
         return;
       }
@@ -194,10 +222,15 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       await product.save();
     }
 
+    console.log('✓ Order items processed:', orderItems.length);
+    console.log('Subtotal:', subtotal);
+
     // Calculate totals
     const tax = 0; // You can calculate tax here
     const shippingCost = 0; // You can calculate shipping here
     const total = subtotal + tax + shippingCost;
+
+    console.log('Total:', total);
 
     // Create payment intent for Stripe
     let paymentInfo: any = {
@@ -208,13 +241,37 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
     let clientSecret: string | null = null;
 
     if (paymentMethod === 'stripe') {
+      console.log('Creating Stripe payment intent...');
       const paymentIntent = await createPaymentIntent(total);
       paymentInfo.stripePaymentIntentId = paymentIntent.id;
       clientSecret = paymentIntent.client_secret;
+      console.log('✓ Payment intent created');
     }
+
+    console.log('Creating order in database...');
+
+    // Generate order number
+    const year = new Date().getFullYear();
+    const count = await Order.countDocuments();
+    const orderNumber = `ORD-${year}-${String(count + 1).padStart(6, '0')}`;
+    console.log('Generated order number:', orderNumber);
+
+    console.log('Order data:', {
+      orderNumber,
+      user: req.user._id,
+      items: orderItems.length,
+      subtotal,
+      tax,
+      shippingCost,
+      total,
+      shippingAddress,
+      paymentInfo,
+      status: 'pending',
+    });
 
     // Create order
     const order = await Order.create({
+      orderNumber,
       user: req.user._id,
       items: orderItems,
       subtotal,
@@ -225,6 +282,8 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       paymentInfo,
       status: 'pending',
     });
+
+    console.log('✓ Order created successfully:', order._id);
 
     // Clear user's cart
     cart.items = [];
@@ -242,6 +301,10 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
       },
     });
   } catch (error: any) {
+    console.error('=== ORDER CREATION ERROR ===');
+    console.error('Error:', error);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: error.message || 'Error creating order',

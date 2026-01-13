@@ -83,6 +83,9 @@ function CheckoutForm() {
     setLoading(true);
 
     try {
+      // Log the request for debugging
+      console.log('Creating order with:', { shippingAddress, paymentMethod });
+
       // Create order
       const orderResponse = await api.post('/orders', {
         shippingAddress,
@@ -142,7 +145,8 @@ function CheckoutForm() {
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      toast.error(error.message || 'Failed to process order');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to process order';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
