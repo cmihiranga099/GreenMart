@@ -26,6 +26,13 @@ interface IPaymentInfo {
   paidAt?: Date;
 }
 
+interface ITrackingUpdate {
+  status: string;
+  location: string;
+  description: string;
+  timestamp: Date;
+}
+
 export interface IOrder extends Document {
   orderNumber: string;
   user: mongoose.Types.ObjectId;
@@ -37,6 +44,8 @@ export interface IOrder extends Document {
   shippingAddress: IShippingAddress;
   paymentInfo: IPaymentInfo;
   status: 'pending' | 'confirmed' | 'processing' | 'delivered' | 'cancelled';
+  trackingUpdates: ITrackingUpdate[];
+  estimatedDelivery?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -77,6 +86,25 @@ const paymentInfoSchema = new Schema<IPaymentInfo>({
   },
   stripePaymentIntentId: String,
   paidAt: Date,
+});
+
+const trackingUpdateSchema = new Schema<ITrackingUpdate>({
+  status: {
+    type: String,
+    required: true,
+  },
+  location: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  timestamp: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const orderSchema = new Schema<IOrder>(
@@ -134,6 +162,13 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       enum: ['pending', 'confirmed', 'processing', 'delivered', 'cancelled'],
       default: 'pending',
+    },
+    trackingUpdates: {
+      type: [trackingUpdateSchema],
+      default: [],
+    },
+    estimatedDelivery: {
+      type: Date,
     },
   },
   {

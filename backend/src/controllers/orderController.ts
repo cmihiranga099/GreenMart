@@ -419,6 +419,59 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
   }
 };
 
+// @desc    Add tracking update (Admin)
+// @route   POST /api/orders/:id/tracking
+// @access  Private/Admin
+export const addTrackingUpdate = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { status, location, description, estimatedDelivery } = req.body;
+
+    if (!status || !location || !description) {
+      res.status(400).json({
+        success: false,
+        message: 'Please provide status, location, and description',
+      });
+      return;
+    }
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      res.status(404).json({
+        success: false,
+        message: 'Order not found',
+      });
+      return;
+    }
+
+    // Add tracking update
+    order.trackingUpdates.push({
+      status,
+      location,
+      description,
+      timestamp: new Date(),
+    } as any);
+
+    // Update estimated delivery if provided
+    if (estimatedDelivery) {
+      order.estimatedDelivery = new Date(estimatedDelivery);
+    }
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Tracking update added',
+      data: order,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error adding tracking update',
+    });
+  }
+};
+
 // @desc    Get all orders (Admin)
 // @route   GET /api/orders/all
 // @access  Private/Admin
