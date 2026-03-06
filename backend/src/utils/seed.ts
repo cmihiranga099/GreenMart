@@ -223,7 +223,7 @@ const getProducts = (categoryIds: any) => [
     featured: true,
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?w=500',
+        url: 'https://upload.wikimedia.org/wikipedia/commons/0/03/Broccoli_and_cross_section_edit.jpg',
         publicId: 'sample_broccoli',
         isPrimary: true,
       },
@@ -1161,7 +1161,7 @@ const getProducts = (categoryIds: any) => [
     featured: false,
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1613771404721-1f92d799e49f?w=500',
+        url: 'https://images.unsplash.com/photo-1677735299766-fadfc916086f?w=500',
         publicId: 'sample_crackers',
         isPrimary: true,
       },
@@ -1238,7 +1238,7 @@ const getProducts = (categoryIds: any) => [
     featured: false,
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1603048588665-791ca8aea617?w=500',
+        url: 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=500',
         publicId: 'sample_corn',
         isPrimary: true,
       },
@@ -1277,7 +1277,7 @@ const getProducts = (categoryIds: any) => [
     featured: true,
     images: [
       {
-        url: 'https://images.unsplash.com/photo-1589881133595-c7ce28e46c81?w=500',
+        url: 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=500',
         publicId: 'sample_parmesan',
         isPrimary: true,
       },
