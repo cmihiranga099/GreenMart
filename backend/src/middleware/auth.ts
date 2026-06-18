@@ -11,6 +11,7 @@ declare global {
   }
 }
 
+
 export const auth = async (
   req: Request,
   res: Response,
