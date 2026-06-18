@@ -9,7 +9,9 @@ declare global {
       user?: IUser;
     }
   }
-}
+} 
+
+
 
 
 export const auth = async (
